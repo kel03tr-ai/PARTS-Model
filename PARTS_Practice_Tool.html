@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARTS Framework Practice Tool | AIETP 2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f4f8;
+    color: #1a1a2e;
+    min-height: 100vh;
+  }
+  .header {
+    background: linear-gradient(135deg, #0A3161 0%, #1a5276 100%);
+    color: white;
+    padding: 20px 24px;
+    text-align: center;
+  }
+  .header h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+  .header p { font-size: 0.85rem; opacity: 0.85; }
+  .container { max-width: 680px; margin: 0 auto; padding: 16px; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 3px;
+    margin-bottom: 16px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 6px;
+    text-align: center;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .tab.active { background: white; color: #0A3161; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .tab:hover:not(.active) { color: #334155; }
+
+  /* Cards */
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .card-title .letter {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1rem; color: white; flex-shrink: 0;
+  }
+  .card-title h3 { font-size: 1rem; color: #0A3161; }
+  .card-title .subtitle { font-size: 0.8rem; color: #64748b; font-weight: 400; }
+  .guide-q { font-size: 0.82rem; color: #555; margin-bottom: 8px; font-style: italic; }
+  textarea {
+    width: 100%;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 70px;
+    transition: border-color 0.2s;
+    line-height: 1.5;
+  }
+  textarea:focus { outline: none; border-color: #0A3161; }
+  textarea.filled { border-color: #22c55e; background: #f0fdf4; }
+
+  /* Progress bar */
+  .progress-bar {
+    background: #e2e8f0;
+    border-radius: 20px;
+    height: 8px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, #0A3161, #22c55e);
+    transition: width 0.4s ease;
+  }
+  .progress-label {
+    font-size: 0.78rem;
+    color: #64748b;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  /* Section: Build */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Combined prompt display */
+  .combined-prompt {
+    background: #f8fafc;
+    border: 2px dashed #cbd5e1;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 16px;
+    min-height: 60px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #334155;
+    word-wrap: break-word;
+  }
+  .combined-prompt .placeholder { color: #94a3b8; font-style: italic; }
+  .combined-prompt .p-text { color: #1A7A6D; font-weight: 500; }
+  .combined-prompt .a-text { color: #7c5e10; font-weight: 500; }
+  .combined-prompt .r-text { color: #15803d; font-weight: 500; }
+  .combined-prompt .t-text { color: #1d4ed8; font-weight: 500; }
+  .combined-prompt .s-text { color: #7e22ce; font-weight: 500; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-primary { background: #0A3161; color: white; }
+  .btn-primary:hover { background: #0d3d7a; }
+  .btn-secondary { background: #e2e8f0; color: #475569; }
+  .btn-secondary:hover { background: #cbd5e1; }
+  .btn-success { background: #16a34a; color: white; }
+  .btn-success:hover { background: #15803d; }
+  .btn-warning { background: #d97706; color: white; }
+  .btn-warning:hover { background: #b45309; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Examples section */
+  .example-card {
+    border-left: 4px solid #0A3161;
+    background: #f8fafc;
+    padding: 12px 14px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .example-card:hover { background: #eef2f7; }
+  .example-card h4 { font-size: 0.85rem; color: #0A3161; margin-bottom: 4px; }
+  .example-card p { font-size: 0.78rem; color: #64748b; line-height: 1.4; }
+
+  /* Tips section */
+  .tip-box {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+  .tip-box strong { color: #92400e; }
+
+  /* Score display */
+  .score-ring {
+    width: 120px; height: 120px;
+    margin: 0 auto 16px;
+    position: relative;
+  }
+  .score-ring svg { width: 120px; height: 120px; transform: rotate(-90deg); }
+  .score-ring circle {
+    fill: none;
+    stroke-width: 10;
+    cx: 60; cy: 60; r: 50;
+  }
+  .score-ring .bg { stroke: #e2e8f0; }
+  .score-ring .fg { stroke-linecap: round; transition: stroke-dashoffset 0.8s ease, stroke 0.4s; }
+  .score-ring .score-text {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #0A3161;
+  }
+  .score-ring .score-label {
+    position: absolute;
+    top: 68%; left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.65rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Evaluation feedback */
+  .eval-element {
+    border-left: 4px solid #e2e8f0;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    border-radius: 0 8px 8px 0;
+    background: #f8fafc;
+    transition: border-color 0.3s;
+  }
+  .eval-element.score-high { border-left-color: #22c55e; }
+  .eval-element.score-mid { border-left-color: #f59e0b; }
+  .eval-element.score-low { border-left-color: #ef4444; }
+  .eval-element.score-empty { border-left-color: #cbd5e1; }
+  .eval-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .eval-header h4 { font-size: 0.9rem; color: #0A3161; }
+  .eval-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+  }
+  .badge-high { background: #dcfce7; color: #15803d; }
+  .badge-mid { background: #fef3c7; color: #92400e; }
+  .badge-low { background: #fee2e2; color: #b91c1c; }
+  .badge-empty { background: #f1f5f9; color: #94a3b8; }
+  .eval-detail { font-size: 0.82rem; color: #555; line-height: 1.5; }
+  .eval-suggestion {
+    margin-top: 6px;
+    padding: 8px 10px;
+    background: #eff6ff;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: #1d4ed8;
+    line-height: 1.4;
+  }
+  .eval-what-found {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin-bottom: 4px;
+  }
+
+  /* Self-reflection rubric */
+  .reflect-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+  }
+  .reflect-label {
+    flex: 0 0 100px;
+    background: #f1f5f9;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #0A3161;
+  }
+  .reflect-options {
+    flex: 1;
+    display: flex;
+  }
+  .reflect-opt {
+    flex: 1;
+    padding: 10px 6px;
+    text-align: center;
+    font-size: 0.72rem;
+    cursor: pointer;
+    border-left: 1px solid #e2e8f0;
+    transition: all 0.2s;
+    color: #64748b;
+    background: white;
+    line-height: 1.3;
+    border: none;
+    outline: none;
+  }
+  .reflect-opt:hover { background: #f0f4f8; }
+  .reflect-opt.selected-1 { background: #fee2e2; color: #b91c1c; font-weight: 600; }
+  .reflect-opt.selected-2 { background: #fef3c7; color: #92400e; font-weight: 600; }
+  .reflect-opt.selected-3 { background: #dcfce7; color: #15803d; font-weight: 600; }
+
+  /* Compare view */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .compare-col {
+    background: white;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .compare-col h4 {
+    font-size: 0.82rem;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .compare-col.original h4 { color: #94a3b8; border-bottom-color: #e2e8f0; }
+  .compare-col.revised h4 { color: #16a34a; border-bottom-color: #dcfce7; }
+  .compare-score {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 800;
+    padding: 8px 0;
+  }
+  .compare-score.original { color: #94a3b8; }
+  .compare-score.revised { color: #16a34a; }
+  .compare-score-label {
+    text-align: center;
+    font-size: 0.7rem;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .compare-prompt-text {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #475569;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .compare-element-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.8rem;
+  }
+  .compare-element-row:last-child { border-bottom: none; }
+  .improvement-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin: 0 4px;
+  }
+  .improvement-up { background: #dcfce7; color: #15803d; }
+  .improvement-same { background: #f1f5f9; color: #94a3b8; }
+  .improvement-down { background: #fee2e2; color: #b91c1c; }
+  .no-snapshot {
+    text-align: center;
+    padding: 40px 20px;
+    color: #94a3b8;
+    font-size: 0.9rem;
+  }
+  .no-snapshot p { margin-top: 8px; font-size: 0.82rem; }
+
+  /* Copy toast */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1e293b;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 100;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+
+  /* Colors for PARTS letters */
+  .bg-p { background: #1A7A6D; }
+  .bg-a { background: #7c5e10; }
+  .bg-r { background: #15803d; }
+  .bg-t { background: #1d4ed8; }
+  .bg-s { background: #7e22ce; }
+
+  /* Overall quality bar */
+  .quality-summary {
+    text-align: center;
+    padding: 12px 0 4px;
+    font-size: 0.82rem;
+    color: #475569;
+  }
+  .quality-level {
+    font-weight: 700;
+    font-size: 1rem;
+    display: block;
+    margin-top: 4px;
+  }
+
+  /* Responsive */
+  @media (max-width: 500px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .tab { font-size: 0.68rem; padding: 9px 4px; }
+    .reflect-label { flex: 0 0 80px; font-size: 0.75rem; }
+    .reflect-opt { font-size: 0.65rem; padding: 8px 4px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>PARTS Framework Practice Tool</h1>
+  <p>AIETP 2026 | Build, evaluate, and refine prompts for EFL teaching</p>
+</div>
+
+<div class="container">
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('build', this)">Build</button>
+    <button class="tab" onclick="switchTab('evaluate', this)">Evaluate</button>
+    <button class="tab" onclick="switchTab('reflect', this)">Reflect</button>
+    <button class="tab" onclick="switchTab('compare', this)">Compare</button>
+    <button class="tab" onclick="switchTab('examples', this)">Examples</button>
+  </div>
+
+  <!-- ==================== BUILD TAB ==================== -->
+  <div id="tab-build" class="section active">
+    <div class="progress-label"><span id="progress-text">0 of 5 elements completed</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="letter bg-p">P</div>
+        <div><h3>Persona</h3><span class="subtitle">Who should the AI act as?</span></div>
+      </div>
+      <div class="guide-q">e.g., "Act as an experienced EFL teacher...", "Act as a curriculum designer..."</div>
+      <textarea id="input-p" placeholder="Act as a..." oninput="updatePrompt()"></textarea>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="letter bg-a">A</div>
+        <div><h3>Aim</h3><span class="subtitle">What is the purpose or goal?</span></div>
+      </div>
+      <div class="guide-q">e.g., "...to develop reading comprehension skills...", "...to create a formative assessment..."</div>
+      <textarea id="input-a" placeholder="...to..." oninput="updatePrompt()"></textarea>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="letter bg-r">R</div>
+        <div><h3>Recipients</h3><span class="subtitle">Who are your students?</span></div>
+      </div>
+      <div class="guide-q">Include: CEFR level, L1, age, learning context, specific language needs</div>
+      <textarea id="input-r" placeholder="...for [level] [L1] students aged [age] in [context]..." oninput="updatePrompt()"></textarea>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="letter bg-t">T</div>
+        <div><h3>Theme</h3><span class="subtitle">What is the topic or communicative function?</span></div>
+      </div>
+      <div class="guide-q">e.g., "...on the topic of climate change...", "...focusing on making requests politely..."</div>
+      <textarea id="input-t" placeholder="...on the topic of..." oninput="updatePrompt()"></textarea>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <div class="letter bg-s">S</div>
+        <div><h3>Structure</h3><span class="subtitle">What should the output look like?</span></div>
+      </div>
+      <div class="guide-q">Specify: format, length, number of items, question types, style, etc.</div>
+      <textarea id="input-s" placeholder="Include... with... Format as..." oninput="updatePrompt()"></textarea>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <span style="font-size:1.2rem;">&#x1F4DD;</span>
+        <h3 style="font-size:1rem;color:#0A3161;">Your Combined Prompt</h3>
+      </div>
+      <div class="combined-prompt" id="combined-prompt">
+        <span class="placeholder">Start filling in the PARTS elements above to see your prompt build here...</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="copyPrompt()">&#x1F4CB; Copy</button>
+        <button class="btn btn-success" onclick="runEvaluation()">&#x2714; Evaluate</button>
+        <button class="btn btn-secondary" onclick="clearAll()">&#x1F5D1; Clear</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== EVALUATE TAB ==================== -->
+  <div id="tab-evaluate" class="section">
+    <div id="eval-empty" class="card" style="text-align:center;padding:40px 20px;">
+      <div style="font-size:2rem;margin-bottom:12px;">&#x1F50D;</div>
+      <p style="color:#64748b;font-size:0.9rem;">Write your prompt in the <strong>Build</strong> tab first, then come here to evaluate it.</p>
+      <p style="color:#94a3b8;font-size:0.8rem;margin-top:8px;">Or press the <strong>Evaluate</strong> button on the Build tab.</p>
+    </div>
+
+    <div id="eval-results" style="display:none;">
+      <!-- Score ring -->
+      <div class="card" style="text-align:center;">
+        <div class="score-ring">
+          <svg><circle class="bg"/><circle class="fg" id="score-circle" stroke-dasharray="314" stroke-dashoffset="314"/></svg>
+          <div class="score-text" id="score-number">0</div>
+          <div class="score-label">/ 100</div>
+        </div>
+        <div class="quality-summary">
+          Prompt Quality: <span class="quality-level" id="quality-level">&#x2014;</span>
+        </div>
+      </div>
+
+      <!-- Element-by-element feedback -->
+      <div id="eval-elements"></div>
+
+      <!-- Overall suggestions -->
+      <div class="card" id="eval-overall-card" style="display:none;">
+        <h3 style="color:#0A3161;margin-bottom:10px;">&#x1F4A1; Top Suggestions</h3>
+        <div id="eval-overall"></div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:16px;">
+        <button class="btn btn-warning" onclick="saveSnapshot()">&#x1F4F8; Save as Original</button>
+        <button class="btn btn-primary" onclick="switchTab('build', document.querySelectorAll('.tab')[0])">&#x270F;&#xFE0F; Revise Prompt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== REFLECT TAB ==================== -->
+  <div id="tab-reflect" class="section">
+    <div class="card">
+      <h3 style="color:#0A3161;margin-bottom:6px;">Self-Reflection Rubric</h3>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:16px;">After reviewing the automated evaluation, rate your own prompt honestly. Compare your assessment with the tool's scores.</p>
+
+      <div class="reflect-row">
+        <div class="reflect-label">P &#x2014; Persona</div>
+        <div class="reflect-options">
+          <button class="reflect-opt" data-el="p" data-val="1" onclick="selectReflect(this)">Missing or vague role</button>
+          <button class="reflect-opt" data-el="p" data-val="2" onclick="selectReflect(this)">Role stated but generic</button>
+          <button class="reflect-opt" data-el="p" data-val="3" onclick="selectReflect(this)">Specific, relevant role</button>
+        </div>
+      </div>
+
+      <div class="reflect-row">
+        <div class="reflect-label">A &#x2014; Aim</div>
+        <div class="reflect-options">
+          <button class="reflect-opt" data-el="a" data-val="1" onclick="selectReflect(this)">No clear goal stated</button>
+          <button class="reflect-opt" data-el="a" data-val="2" onclick="selectReflect(this)">Goal present but broad</button>
+          <button class="reflect-opt" data-el="a" data-val="3" onclick="selectReflect(this)">Specific learning goal with skill focus</button>
+        </div>
+      </div>
+
+      <div class="reflect-row">
+        <div class="reflect-label">R &#x2014; Recipients</div>
+        <div class="reflect-options">
+          <button class="reflect-opt" data-el="r" data-val="1" onclick="selectReflect(this)">No learner details</button>
+          <button class="reflect-opt" data-el="r" data-val="2" onclick="selectReflect(this)">Some details (e.g., level only)</button>
+          <button class="reflect-opt" data-el="r" data-val="3" onclick="selectReflect(this)">CEFR + age + L1 + context</button>
+        </div>
+      </div>
+
+      <div class="reflect-row">
+        <div class="reflect-label">T &#x2014; Theme</div>
+        <div class="reflect-options">
+          <button class="reflect-opt" data-el="t" data-val="1" onclick="selectReflect(this)">No topic specified</button>
+          <button class="reflect-opt" data-el="t" data-val="2" onclick="selectReflect(this)">Topic given but broad</button>
+          <button class="reflect-opt" data-el="t" data-val="3" onclick="selectReflect(this)">Specific topic or communicative function</button>
+        </div>
+      </div>
+
+      <div class="reflect-row">
+        <div class="reflect-label">S &#x2014; Structure</div>
+        <div class="reflect-options">
+          <button class="reflect-opt" data-el="s" data-val="1" onclick="selectReflect(this)">No format specified</button>
+          <button class="reflect-opt" data-el="s" data-val="2" onclick="selectReflect(this)">Some format details</button>
+          <button class="reflect-opt" data-el="s" data-val="3" onclick="selectReflect(this)">Length + format + item types specified</button>
+        </div>
+      </div>
+
+      <div class="reflect-row">
+        <div class="reflect-label">ELT Focus</div>
+        <div class="reflect-options">
+          <button class="reflect-opt" data-el="elt" data-val="1" onclick="selectReflect(this)">Could be any subject</button>
+          <button class="reflect-opt" data-el="elt" data-val="2" onclick="selectReflect(this)">Mentions language but generic</button>
+          <button class="reflect-opt" data-el="elt" data-val="3" onclick="selectReflect(this)">Clear language teaching purpose</button>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding:14px;background:#f8fafc;border-radius:8px;text-align:center;">
+        <div style="font-size:0.78rem;color:#64748b;margin-bottom:4px;">Your Self-Assessment</div>
+        <div style="font-size:1.5rem;font-weight:800;color:#0A3161;" id="reflect-score">&#x2014; / 18</div>
+        <div style="font-size:0.78rem;color:#64748b;margin-top:4px;" id="reflect-comparison"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== COMPARE TAB ==================== -->
+  <div id="tab-compare" class="section">
+    <div id="compare-empty" class="no-snapshot">
+      <div style="font-size:2.5rem;">&#x1F4F8;</div>
+      <p><strong>No original saved yet.</strong></p>
+      <p>Go to the <strong>Evaluate</strong> tab, evaluate your first prompt, then press <strong>"Save as Original"</strong> to save a snapshot. After revising your prompt, evaluate again to see the comparison here.</p>
+    </div>
+
+    <div id="compare-content" style="display:none;">
+      <!-- Score comparison -->
+      <div class="compare-grid">
+        <div class="compare-col original">
+          <h4>&#x1F4C4; Original Prompt</h4>
+          <div class="compare-score original" id="compare-score-orig">0</div>
+          <div class="compare-score-label">Original Score</div>
+        </div>
+        <div class="compare-col revised">
+          <h4>&#x2728; Revised Prompt</h4>
+          <div class="compare-score revised" id="compare-score-rev">0</div>
+          <div class="compare-score-label">Revised Score</div>
+        </div>
+      </div>
+
+      <!-- Improvement summary -->
+      <div class="card" id="compare-summary">
+        <h3 style="color:#0A3161;margin-bottom:12px;">Element-by-Element Comparison</h3>
+        <div id="compare-elements"></div>
+      </div>
+
+      <!-- Side by side prompts -->
+      <div class="compare-grid">
+        <div class="compare-col original">
+          <h4>Original</h4>
+          <div class="compare-prompt-text" id="compare-text-orig"></div>
+        </div>
+        <div class="compare-col revised">
+          <h4>Revised</h4>
+          <div class="compare-prompt-text" id="compare-text-rev"></div>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:16px;">
+        <button class="btn btn-secondary" onclick="clearSnapshot()">&#x1F5D1; Clear Original</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== EXAMPLES + TIPS TAB ==================== -->
+  <div id="tab-examples" class="section">
+    <div class="card">
+      <h3 style="color:#0A3161;margin-bottom:12px;">Example PARTS Prompts</h3>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:16px;">Tap an example to load it into the builder.</p>
+
+      <div class="example-card" onclick="loadExample(0)">
+        <h4>&#x1F4D6; K-12: Reading Comprehension</h4>
+        <p>B1 reading text on climate change for Turkish high school students with comprehension questions and vocabulary.</p>
+      </div>
+
+      <div class="example-card" onclick="loadExample(1)">
+        <h4>&#x1F3A4; Secondary: Speaking Activity</h4>
+        <p>A2 pair work activity on hobbies for Turkish secondary school students aged 13&#x2013;14 with dialogue model and vocabulary.</p>
+      </div>
+
+      <div class="example-card" onclick="loadExample(2)">
+        <h4>&#x270D;&#xFE0F; Secondary: Guided Writing</h4>
+        <p>B1 guided writing on describing a favourite place for 15-year-old Turkish students preparing for an exam.</p>
+      </div>
+
+      <div class="example-card" onclick="loadExample(3)">
+        <h4>&#x1F9E9; K-12: Grammar Review</h4>
+        <p>A2 grammar review on present continuous for Turkish middle school students with error correction tasks.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="color:#0A3161;margin-bottom:12px;">Prompt Writing Tips for EFL Teachers</h3>
+
+      <div class="tip-box">
+        <strong>Be specific about the level.</strong> Don't just say "beginner." Say "A2-level" or "B1-level" so the AI calibrates vocabulary and grammar complexity. If you're targeting a specific exam (e.g., YDS, LGS), mention it.
+      </div>
+      <div class="tip-box">
+        <strong>Mention the L1.</strong> Saying "Turkish-speaking students" helps the AI anticipate common errors (e.g., article usage, word order) and can produce more relevant content.
+      </div>
+      <div class="tip-box">
+        <strong>Specify the skill focus.</strong> "Reading comprehension" is better than "reading." Even better: "scanning for specific information in a reading text."
+      </div>
+      <div class="tip-box">
+        <strong>Ask for teacher instructions too.</strong> Adding "Include teacher instructions and answer key" saves you time and makes AI output more classroom-ready.
+      </div>
+      <div class="tip-box">
+        <strong>Set word/time limits.</strong> "300-word text" or "5-minute activity" gives the AI a clear constraint. Without it, outputs tend to be too long or too short.
+      </div>
+      <div class="tip-box">
+        <strong>Iterate.</strong> Your first prompt rarely gives the perfect result. Use the <strong>Evaluate</strong> tab to check your prompt quality, revise, then <strong>Compare</strong> your original and revised versions.
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    AIETP 2026 | Artificial Intelligence in English Teaching Project<br>
+    Dr. Mehmet Abi | Mu&#x011F;la S&#x0131;tk&#x0131; Ko&#xE7;man University
+  </div>
+</div>
+
+<div class="toast" id="toast">Prompt copied to clipboard!</div>
+
+<script>
+// ==================== DATA ====================
+const examples = [
+  {
+    p: 'Act as an experienced EFL teacher creating reading materials',
+    a: 'to develop reading comprehension and vocabulary skills',
+    r: 'for B1-level Turkish high school students aged 15-17 preparing for their English exam',
+    t: 'on the topic of climate change and its local effects in Turkey',
+    s: 'with 300 words, 5 comprehension questions (2 true/false, 2 multiple choice, 1 open-ended), and a vocabulary list of 8 key words with definitions'
+  },
+  {
+    p: 'Act as an experienced EFL teacher designing speaking activities',
+    a: 'to develop listening and speaking skills through pair interaction',
+    r: 'for A2-level Turkish secondary school students aged 13-14 in a state school',
+    t: 'on the topic of hobbies and free-time activities',
+    s: 'Create a 10-minute pair work activity with a dialogue model, 6 key vocabulary items with Turkish glosses, and simple follow-up questions for personalisation'
+  },
+  {
+    p: 'Act as an EFL writing instructor',
+    a: 'to practise guided descriptive writing with clear paragraph structure',
+    r: 'for B1-level Turkish students aged 15 in a high school English class preparing for the national exam',
+    t: 'on the topic of describing a favourite place',
+    s: 'Include a model paragraph (100 words), a planning template with guiding questions, 6 useful adjectives and linking words, and a simple self-check rubric for students'
+  },
+  {
+    p: 'Act as a creative EFL teacher designing grammar practice activities',
+    a: 'to review and consolidate the present continuous tense through engaging error correction tasks',
+    r: 'for A2-level Turkish middle school students aged 12-13 who commonly confuse present simple and present continuous',
+    t: 'focusing on the present continuous tense for actions happening now vs. daily routines',
+    s: 'Create 8 error correction sentences (4 correct, 4 incorrect), a sorting activity for present simple vs. present continuous, and a brief teacher answer key'
+  }
+];
+
+// CEFR levels and language skill keywords for detection
+const cefrLevels = ['A1','A2','B1','B2','C1','C2','pre-A1','pre-intermediate','elementary','intermediate','upper-intermediate','advanced'];
+const cefrRegex = /\b(A1|A2|B1|B2|C1|C2|pre[\s-]?A1|pre[\s-]?intermediate|elementary|intermediate|upper[\s-]?intermediate|advanced)\b/i;
+const ageRegex = /\b(age[ds]?\s*\d+|\d+[\s-]*(year|yr)[\s-]*(old)?|aged?\s*\d+\s*[-\u2013]\s*\d+|\d+\s*[-\u2013]\s*\d+\s*(year|yr))/i;
+const l1Regex = /\b(Turkish|Arabic|Kurdish|L1|first language|native language|mother tongue)\b/i;
+const contextRegex = /\b(state school|private school|high school|lise|middle school|ortaokul|secondary|primary|prep school|university|college|EAP|exam prep|YDS|LGS|YKS|YDT)\b/i;
+const skillRegex = /\b(reading|writing|speaking|listening|grammar|vocabulary|pronunciation|comprehension|fluency|accuracy|scanning|skimming|discourse|pragmatic|communicative)\b/i;
+const formatRegex = /\b(\d+[\s-]*(word|minute|min|item|question|sentence|paragraph|page)|\d+\s*(words|minutes|items|questions|sentences|paragraphs|pages)|multiple[\s-]?choice|true[\s/]?false|gap[\s-]?fill|matching|open[\s-]?ended|rubric|checklist|answer key|teacher instructions)\b/i;
+const numberRegex = /\b\d+\b/;
+const roleRegex = /\b(act as|you are|role of|as a[n]?)\b/i;
+const eltRegex = /\b(EFL|ESL|ELT|EAP|English|language teach|CEFR|communicative|CLIL|task[\s-]?based|vocabulary|grammar|fluency|proficiency)\b/i;
+
+// State
+let snapshot = null;  // {score, elements, promptText, elementScores}
+let lastEval = null;
+
+// ==================== BUILD TAB ====================
+function getValues() {
+  const fields = ['p','a','r','t','s'];
+  const vals = {};
+  fields.forEach(f => { vals[f] = document.getElementById('input-' + f).value.trim(); });
+  return vals;
+}
+
+function updatePrompt() {
+  const vals = getValues();
+  let filled = 0;
+  ['p','a','r','t','s'].forEach(f => {
+    const ta = document.getElementById('input-' + f);
+    if (vals[f]) { ta.classList.add('filled'); filled++; }
+    else { ta.classList.remove('filled'); }
+  });
+
+  document.getElementById('progress-fill').style.width = (filled / 5 * 100) + '%';
+  document.getElementById('progress-text').textContent = filled + ' of 5 elements completed';
+
+  const box = document.getElementById('combined-prompt');
+  if (filled === 0) {
+    box.innerHTML = '<span class="placeholder">Start filling in the PARTS elements above to see your prompt build here...</span>';
+    return;
+  }
+  let parts = [];
+  if (vals.p) parts.push('<span class="p-text">' + esc(vals.p) + '</span>');
+  if (vals.a) parts.push('<span class="a-text">' + esc(vals.a) + '</span>');
+  if (vals.r) parts.push('<span class="r-text">' + esc(vals.r) + '</span>');
+  if (vals.t) parts.push('<span class="t-text">' + esc(vals.t) + '</span>');
+  if (vals.s) parts.push('<span class="s-text">' + esc(vals.s) + '</span>');
+  box.innerHTML = parts.join(' ');
+}
+
+function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function copyPrompt() {
+  const vals = getValues();
+  const text = ['p','a','r','t','s'].map(f => vals[f]).filter(Boolean).join(' ');
+  if (!text) return;
+  navigator.clipboard.writeText(text).then(() => showToast('Prompt copied to clipboard!')).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('Prompt copied to clipboard!');
+  });
+}
+
+function clearAll() {
+  ['p','a','r','t','s'].forEach(f => { document.getElementById('input-' + f).value = ''; });
+  updatePrompt();
+}
+
+function loadExample(idx) {
+  const ex = examples[idx];
+  document.getElementById('input-p').value = ex.p;
+  document.getElementById('input-a').value = ex.a;
+  document.getElementById('input-r').value = ex.r;
+  document.getElementById('input-t').value = ex.t;
+  document.getElementById('input-s').value = ex.s;
+  updatePrompt();
+  switchTab('build', document.querySelectorAll('.tab')[0]);
+}
+
+// ==================== EVALUATION ENGINE ====================
+function evaluateElement(key, text, allVals) {
+  const result = { score: 0, max: 20, found: [], missing: [], suggestions: [] };
+  if (!text) {
+    result.score = 0;
+    result.level = 'empty';
+    result.missing.push('This element is empty.');
+    return result;
+  }
+
+  const words = text.split(/\s+/).length;
+
+  switch(key) {
+    case 'p': {
+      // Persona: check for role specification
+      if (roleRegex.test(text)) { result.score += 8; result.found.push('Role assignment detected'); }
+      else { result.score += 3; result.missing.push('Start with "Act as..." to clearly assign a role'); }
+
+      if (eltRegex.test(text)) { result.score += 6; result.found.push('EFL/ELT context specified'); }
+      else { result.missing.push('Mention EFL, ESL, or language teaching to ground the role'); result.score += 1; }
+
+      if (words >= 6) { result.score += 4; result.found.push('Sufficient detail'); }
+      else if (words >= 3) { result.score += 2; result.suggestions.push('Add more detail about the persona\'s expertise or focus area'); }
+      else { result.suggestions.push('Expand: what type of teacher? What expertise?'); }
+
+      // Check for specific expertise
+      if (/\b(experienced|expert|specialist|creative|senior)\b/i.test(text)) { result.score += 2; result.found.push('Expertise level specified'); }
+      break;
+    }
+    case 'a': {
+      // Aim: check for learning objective
+      if (skillRegex.test(text)) { result.score += 8; result.found.push('Language skill focus identified'); }
+      else { result.score += 2; result.missing.push('Specify the language skill: reading, writing, speaking, listening, grammar, or vocabulary'); }
+
+      if (/\b(develop|practise|practice|improve|reinforce|consolidate|assess|review|introduce|build|strengthen|activate)\b/i.test(text)) {
+        result.score += 5; result.found.push('Learning action verb used');
+      } else {
+        result.score += 1; result.suggestions.push('Use a learning verb: develop, practise, reinforce, consolidate, etc.');
+      }
+
+      if (words >= 6) { result.score += 5; result.found.push('Clear and detailed goal'); }
+      else if (words >= 3) { result.score += 3; result.suggestions.push('Be more specific about what students should be able to do'); }
+      else { result.score += 1; result.suggestions.push('The aim is too brief \u2014 what exactly should learners achieve?'); }
+
+      if (/\b(through|by|via|using)\b/i.test(text)) { result.score += 2; result.found.push('Method/approach mentioned'); }
+      break;
+    }
+    case 'r': {
+      // Recipients: CEFR, age, L1, context, needs
+      if (cefrRegex.test(text)) { result.score += 5; result.found.push('CEFR level specified'); }
+      else { result.missing.push('Add CEFR level (A1, A2, B1, B2, C1, C2)'); }
+
+      if (ageRegex.test(text)) { result.score += 4; result.found.push('Age/age range specified'); }
+      else { result.missing.push('Include student age or age range'); }
+
+      if (l1Regex.test(text)) { result.score += 4; result.found.push('L1 background specified'); }
+      else { result.missing.push('Mention L1 (e.g., "Turkish-speaking") for better output'); }
+
+      if (contextRegex.test(text)) { result.score += 4; result.found.push('Learning context specified'); }
+      else { result.missing.push('Add context: state school, private school, exam prep, etc.'); }
+
+      // Extra specificity
+      if (/\b(preparing|struggling|need|difficulty|weak|strong|interested|motivated|reluctant)\b/i.test(text)) {
+        result.score += 3; result.found.push('Specific learner needs mentioned');
+      } else if (result.score >= 12) {
+        result.suggestions.push('For even better results, mention specific needs: "preparing for YDS", "struggling with articles", etc.');
+      }
+      break;
+    }
+    case 't': {
+      // Theme: topic specificity
+      if (words >= 3) { result.score += 6; result.found.push('Topic is reasonably specific'); }
+      else if (words >= 1) { result.score += 2; result.missing.push('The topic is too vague \u2014 narrow it down'); }
+
+      if (/\b(on the topic of|focusing on|about|related to|covering|the theme of)\b/i.test(text)) {
+        result.score += 3; result.found.push('Clear topic framing');
+      } else { result.score += 1; }
+
+      // Check if topic is connected to language function or skill
+      if (/\b(function|communicative|request|complaint|opinion|narrative|descriptive|persuasive|comparison|cause.effect|problem.solution)\b/i.test(text)) {
+        result.score += 6; result.found.push('Communicative function specified');
+      } else if (skillRegex.test(text)) {
+        result.score += 4; result.found.push('Language skill connection present');
+      } else {
+        result.score += 1; result.suggestions.push('Consider linking the topic to a communicative function or language focus');
+      }
+
+      // Cultural relevance
+      if (/\b(Turkey|Turkish|local|cultural|Turkiye)\b/i.test(text)) {
+        result.score += 3; result.found.push('Cultural/local relevance');
+      }
+
+      if (words >= 8) { result.score += 2; }
+      break;
+    }
+    case 's': {
+      // Structure: format, length, specifics
+      if (numberRegex.test(text)) { result.score += 5; result.found.push('Numerical specification found'); }
+      else { result.missing.push('Add numbers: how many items, words, minutes, questions?'); }
+
+      if (formatRegex.test(text)) { result.score += 5; result.found.push('Output format specified'); }
+      else { result.missing.push('Specify format: multiple choice, gap-fill, matching, essay, etc.'); }
+
+      if (/\b(answer key|teacher|instructions|rubric|checklist|model|example)\b/i.test(text)) {
+        result.score += 4; result.found.push('Teacher support materials requested');
+      } else {
+        result.suggestions.push('Add "Include teacher instructions and answer key" for classroom-ready output');
+      }
+
+      if (words >= 10) { result.score += 4; result.found.push('Detailed structural guidance'); }
+      else if (words >= 5) { result.score += 2; result.suggestions.push('Add more detail about expected output format'); }
+      else { result.score += 1; result.suggestions.push('Be more specific: length, number of items, format type'); }
+
+      // Multiple components
+      const commaCount = (text.match(/,/g) || []).length;
+      if (commaCount >= 2) { result.score += 2; result.found.push('Multiple output components listed'); }
+      break;
+    }
+  }
+
+  result.score = Math.min(result.score, result.max);
+
+  if (result.score >= 16) result.level = 'high';
+  else if (result.score >= 10) result.level = 'mid';
+  else result.level = 'low';
+
+  return result;
+}
+
+function runEvaluation() {
+  const vals = getValues();
+  const anyFilled = Object.values(vals).some(v => v);
+  if (!anyFilled) {
+    showToast('Write your prompt first!');
+    return;
+  }
+
+  const elements = {};
+  let totalScore = 0;
+  ['p','a','r','t','s'].forEach(key => {
+    elements[key] = evaluateElement(key, vals[key], vals);
+    totalScore += elements[key].score;
+  });
+
+  // Bonus: overall coherence
+  const allText = Object.values(vals).join(' ');
+  let bonus = 0;
+  if (eltRegex.test(allText) && cefrRegex.test(allText)) bonus += 2;
+  if (l1Regex.test(allText) && ageRegex.test(allText)) bonus += 2;
+
+  // Does the prompt tell a coherent story?
+  const filledCount = Object.values(vals).filter(v => v).length;
+  if (filledCount === 5) bonus += 2;
+
+  // Cap at 100 (5 elements x 20 max each = 100, but with bonus)
+  totalScore = Math.min(totalScore + bonus, 100);
+
+  lastEval = { score: totalScore, elements, vals, promptText: Object.values(vals).filter(Boolean).join(' ') };
+
+  renderEvaluation(lastEval);
+  switchTab('evaluate', document.querySelectorAll('.tab')[1]);
+}
+
+function renderEvaluation(evalData) {
+  document.getElementById('eval-empty').style.display = 'none';
+  document.getElementById('eval-results').style.display = 'block';
+
+  // Score ring
+  const circumference = 314;
+  const offset = circumference - (evalData.score / 100) * circumference;
+  const circle = document.getElementById('score-circle');
+  circle.style.strokeDashoffset = offset;
+
+  // Color based on score
+  let color;
+  if (evalData.score >= 75) color = '#22c55e';
+  else if (evalData.score >= 50) color = '#f59e0b';
+  else color = '#ef4444';
+  circle.style.stroke = color;
+
+  document.getElementById('score-number').textContent = evalData.score;
+
+  // Quality level
+  const levelEl = document.getElementById('quality-level');
+  if (evalData.score >= 85) { levelEl.textContent = 'Excellent \u2014 ready to use'; levelEl.style.color = '#15803d'; }
+  else if (evalData.score >= 70) { levelEl.textContent = 'Good \u2014 minor improvements possible'; levelEl.style.color = '#16a34a'; }
+  else if (evalData.score >= 50) { levelEl.textContent = 'Fair \u2014 needs more detail'; levelEl.style.color = '#d97706'; }
+  else if (evalData.score >= 30) { levelEl.textContent = 'Weak \u2014 several elements need work'; levelEl.style.color = '#ea580c'; }
+  else { levelEl.textContent = 'Incomplete \u2014 fill in more elements'; levelEl.style.color = '#dc2626'; }
+
+  // Element feedback
+  const names = { p: 'P \u2014 Persona', a: 'A \u2014 Aim', r: 'R \u2014 Recipients', t: 'T \u2014 Theme', s: 'S \u2014 Structure' };
+  const container = document.getElementById('eval-elements');
+  container.innerHTML = '';
+
+  ['p','a','r','t','s'].forEach(key => {
+    const el = evalData.elements[key];
+    const div = document.createElement('div');
+    div.className = 'eval-element score-' + el.level;
+
+    let badgeClass = 'badge-' + el.level;
+    let badgeText;
+    if (el.level === 'high') badgeText = el.score + '/20 Strong';
+    else if (el.level === 'mid') badgeText = el.score + '/20 Fair';
+    else if (el.level === 'low') badgeText = el.score + '/20 Weak';
+    else badgeText = '0/20 Missing';
+
+    let html = '<div class="eval-header"><h4>' + names[key] + '</h4><span class="eval-badge ' + badgeClass + '">' + badgeText + '</span></div>';
+
+    if (el.found.length > 0) {
+      html += '<div class="eval-what-found">\u2705 ' + el.found.join(' \u00B7 ') + '</div>';
+    }
+
+    if (el.missing.length > 0) {
+      html += '<div class="eval-detail" style="color:#b91c1c;">\u274C ' + el.missing.join(' ') + '</div>';
+    }
+
+    if (el.suggestions.length > 0) {
+      el.suggestions.forEach(s => {
+        html += '<div class="eval-suggestion">\u{1F4A1} ' + s + '</div>';
+      });
+    }
+
+    div.innerHTML = html;
+    container.appendChild(div);
+  });
+
+  // Overall suggestions
+  const overallSuggestions = [];
+  const allText = Object.values(evalData.vals).join(' ');
+  if (!cefrRegex.test(allText)) overallSuggestions.push('Add a CEFR level (A1\u2013C2) somewhere in your prompt for level-appropriate output.');
+  if (!l1Regex.test(allText)) overallSuggestions.push('Mention your students\' L1 (e.g., "Turkish-speaking") so the AI can anticipate transfer errors.');
+  if (!ageRegex.test(allText)) overallSuggestions.push('Include student age \u2014 materials for 12-year-olds differ greatly from materials for 17-year-olds.');
+  if (!/\b(answer key|teacher instructions|teacher notes)\b/i.test(allText)) overallSuggestions.push('Ask for teacher instructions or an answer key to make the output classroom-ready.');
+  if (!numberRegex.test(evalData.vals.s || '')) overallSuggestions.push('Add specific numbers to Structure: how many words, questions, or minutes?');
+
+  const overallCard = document.getElementById('eval-overall-card');
+  const overallDiv = document.getElementById('eval-overall');
+  if (overallSuggestions.length > 0) {
+    overallCard.style.display = 'block';
+    overallDiv.innerHTML = overallSuggestions.map(s => '<div class="eval-suggestion" style="margin-bottom:8px;">\u{1F4A1} ' + s + '</div>').join('');
+  } else {
+    overallCard.style.display = 'none';
+  }
+}
+
+// ==================== SNAPSHOT & COMPARE ====================
+function saveSnapshot() {
+  if (!lastEval) {
+    showToast('Evaluate your prompt first!');
+    return;
+  }
+  snapshot = {
+    score: lastEval.score,
+    elements: JSON.parse(JSON.stringify(lastEval.elements)),
+    promptText: lastEval.promptText,
+    vals: JSON.parse(JSON.stringify(lastEval.vals)),
+    elementScores: {}
+  };
+  ['p','a','r','t','s'].forEach(k => { snapshot.elementScores[k] = lastEval.elements[k].score; });
+  showToast('Original prompt saved! Now revise and re-evaluate.');
+}
+
+function clearSnapshot() {
+  snapshot = null;
+  document.getElementById('compare-empty').style.display = 'block';
+  document.getElementById('compare-content').style.display = 'none';
+}
+
+function updateCompare() {
+  if (!snapshot || !lastEval) {
+    document.getElementById('compare-empty').style.display = 'block';
+    document.getElementById('compare-content').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('compare-empty').style.display = 'none';
+  document.getElementById('compare-content').style.display = 'block';
+
+  document.getElementById('compare-score-orig').textContent = snapshot.score;
+  document.getElementById('compare-score-rev').textContent = lastEval.score;
+
+  document.getElementById('compare-text-orig').textContent = snapshot.promptText;
+  document.getElementById('compare-text-rev').textContent = lastEval.promptText;
+
+  // Element comparison
+  const names = { p: 'Persona', a: 'Aim', r: 'Recipients', t: 'Theme', s: 'Structure' };
+  const elContainer = document.getElementById('compare-elements');
+  elContainer.innerHTML = '';
+
+  ['p','a','r','t','s'].forEach(key => {
+    const orig = snapshot.elementScores[key];
+    const rev = lastEval.elements[key].score;
+    const diff = rev - orig;
+
+    let badgeClass, badgeText;
+    if (diff > 0) { badgeClass = 'improvement-up'; badgeText = '+' + diff; }
+    else if (diff < 0) { badgeClass = 'improvement-down'; badgeText = diff; }
+    else { badgeClass = 'improvement-same'; badgeText = '='; }
+
+    const row = document.createElement('div');
+    row.className = 'compare-element-row';
+    row.innerHTML = '<span><strong>' + names[key] + '</strong></span><span>' + orig + ' \u2192 ' + rev + ' <span class="improvement-badge ' + badgeClass + '">' + badgeText + '</span></span>';
+    elContainer.appendChild(row);
+  });
+
+  // Total row
+  const totalDiff = lastEval.score - snapshot.score;
+  let totalBadge, totalText;
+  if (totalDiff > 0) { totalBadge = 'improvement-up'; totalText = '+' + totalDiff; }
+  else if (totalDiff < 0) { totalBadge = 'improvement-down'; totalText = totalDiff; }
+  else { totalBadge = 'improvement-same'; totalText = '='; }
+
+  const totalRow = document.createElement('div');
+  totalRow.className = 'compare-element-row';
+  totalRow.style.fontWeight = '700';
+  totalRow.style.borderTop = '2px solid #e2e8f0';
+  totalRow.style.paddingTop = '10px';
+  totalRow.style.marginTop = '4px';
+  totalRow.innerHTML = '<span>Total</span><span>' + snapshot.score + ' \u2192 ' + lastEval.score + ' <span class="improvement-badge ' + totalBadge + '">' + totalText + '</span></span>';
+  elContainer.appendChild(totalRow);
+}
+
+// ==================== SELF-REFLECTION ====================
+const reflectScores = {};
+
+function selectReflect(btn) {
+  const el = btn.dataset.el;
+  const val = parseInt(btn.dataset.val);
+
+  // Deselect siblings
+  btn.parentElement.querySelectorAll('.reflect-opt').forEach(b => {
+    b.classList.remove('selected-1', 'selected-2', 'selected-3');
+  });
+  btn.classList.add('selected-' + val);
+
+  reflectScores[el] = val;
+
+  // Calculate total
+  const total = Object.values(reflectScores).reduce((sum, v) => sum + v, 0);
+  const max = Object.keys(reflectScores).length * 3;
+  document.getElementById('reflect-score').textContent = total + ' / 18';
+
+  // Compare with automated score if available
+  if (lastEval) {
+    const compEl = document.getElementById('reflect-comparison');
+    const autoPercent = lastEval.score;
+    const selfPercent = Math.round((total / 18) * 100);
+    const diff = selfPercent - autoPercent;
+    if (Math.abs(diff) <= 10) {
+      compEl.textContent = 'Your self-assessment (' + selfPercent + '%) closely matches the automated score (' + autoPercent + '%).';
+      compEl.style.color = '#16a34a';
+    } else if (diff > 10) {
+      compEl.textContent = 'Your self-assessment (' + selfPercent + '%) is higher than the automated score (' + autoPercent + '%). Review the suggestions in the Evaluate tab.';
+      compEl.style.color = '#d97706';
+    } else {
+      compEl.textContent = 'Your self-assessment (' + selfPercent + '%) is lower than the automated score (' + autoPercent + '%). You may be underestimating your prompt!';
+      compEl.style.color = '#2166AC';
+    }
+  }
+}
+
+// ==================== NAVIGATION ====================
+function switchTab(tabName, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  if (btn) btn.classList.add('active');
+
+  // Auto-update compare tab when switching to it
+  if (tabName === 'compare') updateCompare();
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>
